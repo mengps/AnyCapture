@@ -55,10 +55,10 @@ static void drawCursor(QImage &screen, const QPoint &start)
     /*! 将光标绘制到画布中 */
     if (GetCursorInfo(&ci)) {
         ICONINFO ii = { 0 };
-        cursorPosition = QPoint(ci.ptScreenPos.x - ii.xHotspot, ci.ptScreenPos.y - ii.yHotspot);
         GetIconInfo(ci.hCursor, &ii);
         DeleteObject(ii.hbmColor);
         DeleteObject(ii.hbmMask);
+        cursorPosition = QPoint(ci.ptScreenPos.x - ii.xHotspot, ci.ptScreenPos.y - ii.yHotspot);
         /*! 注意 光标需要混合背景才能得到正确的颜色 */
         BitBlt(hdcMem, 0, 0, cursorWidth, cursorHeight, hdcScreen, cursorPosition.x(), cursorPosition.y(), SRCCOPY);
         DrawIcon(hdcMem, 0, 0, ci.hCursor);
