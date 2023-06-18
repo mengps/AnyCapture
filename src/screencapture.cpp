@@ -206,11 +206,13 @@ void ScreenCapture::run()
 
     Q_ASSERT_X(d->m_captureFrameRate > 0, "ScreenCapture", "captureFrameRate <= 0");
 
+    Q_ASSERT(d->m_captureFrameRate > 0);
+
     int captureInterval = 1000 / d->m_captureFrameRate;
-    QTime updateTime = QTime::currentTime().addMSecs(-captureInterval);
+    QDateTime updateTime = QDateTime::currentDateTime().addMSecs(-captureInterval);
     while (m_captrueThreadRunning) {
-        if (updateTime.msecsTo(QTime::currentTime()) >= captureInterval) {
-            updateTime = QTime::currentTime();
+        if (updateTime.msecsTo(QDateTime::currentDateTime()) >= captureInterval) {
+            updateTime = QDateTime::currentDateTime();
             if (d->m_callback) {
                 const auto &image = grabScreen();
                 if (d->m_outputFormat == OutputVideoFormat::Format_RGB24) {
