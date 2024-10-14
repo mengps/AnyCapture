@@ -106,7 +106,6 @@ bool CameraSurface::present(const QVideoFrame &frame)
     if (frame.isValid()) {
         d->m_currentFrame = frame;
         if (d->m_callback) {
-            d->m_currentFrame.map(QAbstractVideoBuffer::ReadOnly);
             if (d->m_currentFrame.map(QAbstractVideoBuffer::ReadOnly)) {
                 /*! 输出RGB24 */
                 if (d->m_outFormat == OutputVideoFormat::Format_RGB24) {
