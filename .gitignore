@@ -1,6 +1,7 @@
 debug/
 release/
 android-build/
+build/
 buildlib/
 *.user
 *.Debug
@@ -12,3 +13,4 @@ Makefile
 *.qmlc
 *.so-deployment-settings.json
 *.so
+.qtc_clangd
