@@ -1,18 +1,10 @@
 project(libyuvconvertor VERSION 1.0 LANGUAGES CXX)
 
-set(CMAKE_DEBUG_POSTFIX "d")
-
-#linux .so output
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/buildlib/${CMAKE_BUILD_TYPE}")
-#win .dll output
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/buildlib/${CMAKE_BUILD_TYPE}")
-#win .lib output
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/buildlib/${CMAKE_BUILD_TYPE}")
-
-file(GLOB_RECURSE SOURCES "libyuv/*.h" "libyuv/*.cc")
+file(GLOB_RECURSE LIBYUV_SOURCES "libyuv/*.h" "libyuv/*.cc")
 
 add_library(libyuvconvertor SHARED
-    ${SOURCES}
+    ${LIBYUV_SOURCES}
+    libyuvconvertor_global.h
     yuvconvertor.h
     yuvconvertor.cpp
 )
@@ -20,5 +12,24 @@ add_library(libyuvconvertor SHARED
 target_include_directories(libyuvconvertor
     PRIVATE libyuv/include
 )
+target_compile_options(libyuvconvertor PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/utf-8;/Zi>")
 
 target_compile_definitions(libyuvconvertor PRIVATE LIBYUVCONVERTOR_LIBRARY)
+
+set(EXPORT_HEADER
+    yuvconvertor.h
+    libyuvconvertor_global.h
+)
+
+set_target_properties(libyuvconvertor PROPERTIES
+    DEBUG_POSTFIX "d"
+    PUBLIC_HEADER "${EXPORT_HEADER}"
+    PDB_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+)
+
+install(TARGETS libyuvconvertor
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/include
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+)

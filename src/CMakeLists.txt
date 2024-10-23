@@ -8,16 +8,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Multimedia WinExtras
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_DEBUG_POSTFIX "d")
 
-#linux .so output
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/buildlib/${CMAKE_BUILD_TYPE}")
-#win .dll output
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/buildlib/${CMAKE_BUILD_TYPE}")
-#win .lib output
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/buildlib/${CMAKE_BUILD_TYPE}")
-
-add_library(anycapture SHARED
+add_library(libanycapture SHARED
     abstractcapturethread.cpp
     abstractcapturethread.h
     anycapture.cpp
@@ -38,33 +30,43 @@ add_library(anycapture SHARED
     screencapture.h
 )
 
-target_compile_options(anycapture PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+target_compile_options(libanycapture PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/utf-8;/Zi>")
 
-target_include_directories(anycapture PRIVATE ${CMAKE_SOURCE_DIR}/libyuvconvertor)
+target_include_directories(libanycapture PRIVATE ${CMAKE_SOURCE_DIR}/libyuvconvertor)
 
 if (WIN32)
-    target_include_directories(anycapture PRIVATE ${CMAKE_SOURCE_DIR}/DirectXSDK/Include)
-    target_link_libraries(anycapture PRIVATE Qt::WinExtras)
+    target_include_directories(libanycapture PRIVATE ${CMAKE_SOURCE_DIR}/DirectXSDK/Include)
+    target_link_libraries(libanycapture PRIVATE Qt::WinExtras)
     #-lPropsys -lOle32 -lWinmm -lGdi32 -lUser32 -ld3d9 -lD3D11 -lDXGI
-    target_link_libraries(anycapture
-        PRIVATE Propsys
-        PRIVATE Ole32
-        PRIVATE Winmm
-        PRIVATE Gdi32
-        PRIVATE User32
-        PRIVATE d3d9
-        PRIVATE D3D11
-        PRIVATE DXGI
-    )
-    target_link_directories(anycapture
+    target_link_libraries(libanycapture PRIVATE Propsys Ole32 Winmm Gdi32 User32 d3d9 D3D11 DXGI)
+    target_link_directories(libanycapture
         PRIVATE $<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,${CMAKE_SOURCE_DIR}/DirectXSDK/Lib/x64,${CMAKE_SOURCE_DIR}/DirectXSDK/Lib/x86>
     )
 endif()
 
-target_link_libraries(anycapture
+target_link_libraries(libanycapture
     PRIVATE libyuvconvertor
     PRIVATE Qt::Core
     PRIVATE Qt::Multimedia
 )
 
-target_compile_definitions(anycapture PRIVATE LIBANYCAPTURE_LIBRARY)
+target_compile_definitions(libanycapture PRIVATE LIBANYCAPTURE_LIBRARY)
+
+set(EXPORT_HEADER
+    anycapture.h
+    libanycapture_global.h
+)
+
+set_target_properties(libanycapture PROPERTIES
+    DEBUG_POSTFIX "d"
+    PUBLIC_HEADER "${EXPORT_HEADER}"
+    PDB_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+)
+
+install(TARGETS libanycapture
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/include
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/buildlib/${CMAKE_BUILD_TYPE}
+)
+
